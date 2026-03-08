@@ -140,9 +140,29 @@ This provides **observability into the agent’s reasoning pipeline**.
 
 # System Architecture
 
-![Architecture Diagram](docs/architecture.png)
-
----
+```
+User Question
+     │
+     ▼
+Planner Node
+Generates research plan
+     │
+     ▼
+Question Decomposition
+Creates sub-questions
+     │
+     ▼
+Search Node
+Retrieves evidence using Tavily
+     │
+     ▼
+Verifier Node
+Evaluates evidence relevance
+     │
+     ▼
+Synthesizer Node
+Generates citation-grounded answer
+```
 
 This architecture demonstrates **agentic AI system design** where multiple reasoning modules collaborate to produce reliable outputs.
 

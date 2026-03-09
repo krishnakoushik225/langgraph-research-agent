@@ -1,377 +1,222 @@
-# ResearchFlow AI
+# ResearchFlow AI 🔍
+### Self-Correcting Agentic Research Pipeline · LangGraph + FastAPI + Ollama
 
-A **self-correcting agentic research pipeline** built with **LangGraph, Tavily Search, Ollama (local LLM), FastAPI, and React**.
+[![Python](https://img.shields.io/badge/Python-3.10-blue?logo=python)](https://python.org)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Agentic-purple)](https://github.com/langchain-ai/langgraph)
+[![FastAPI](https://img.shields.io/badge/FastAPI-backend-green?logo=fastapi)](https://fastapi.tiangolo.com)
+[![React](https://img.shields.io/badge/React-frontend-blue?logo=react)](https://reactjs.org)
+[![Ollama](https://img.shields.io/badge/Ollama-local%20LLM-orange)](https://ollama.com)
+[![Tavily](https://img.shields.io/badge/Tavily-web%20search-black)](https://tavily.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey)](LICENSE)
 
-ResearchFlow AI demonstrates how modern AI systems can **decompose complex questions, retrieve web evidence, verify relevance, and synthesize citation-grounded answers** using a structured multi-step workflow.
-
----
-
-![Python](https://img.shields.io/badge/Python-3.10-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-backend-green)
-![React](https://img.shields.io/badge/React-frontend-blue)
-![LangGraph](https://img.shields.io/badge/LangGraph-agent%20orchestration-purple)
-![Ollama](https://img.shields.io/badge/Ollama-local%20LLM-orange)
-![Tavily](https://img.shields.io/badge/Tavily-web%20search-black)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
+> **ResearchFlow AI** is a production-grade agentic research system that decomposes complex questions into sub-queries, retrieves and verifies web evidence, and synthesizes citation-grounded answers — with self-correcting retry logic when evidence quality is low.
 
 ---
 
-# Demo
+## 🎬 Demo
 
 ![ResearchFlow AI Demo](docs/researchflow-demo.png)
 
-Research workflow:
-
-```
-User Question
-     ↓
-Research Plan
-     ↓
-Sub-Question Generation
-     ↓
-Web Search (Tavily)
-     ↓
-Evidence Verification
-     ↓
-Answer Synthesis
-```
-
-The system produces:
-
-- a structured research plan  
-- decomposed sub-questions  
-- verified evidence sources  
-- citation-grounded final answers  
+> *Ask any complex research question — ResearchFlow decomposes it, searches for evidence, verifies quality, and returns a cited answer with a full reasoning trace.*
 
 ---
 
-# Why This Project Matters
+## ✨ What Makes This Different from a RAG Chatbot
 
-Single-prompt LLM systems often suffer from:
+Most LLM apps do: `question → retrieve → answer`
 
-- hallucinated answers  
-- missing evidence  
-- weak reasoning chains  
+ResearchFlow does:
+```
+question → decompose → search → verify confidence →
+  if low: re-search with refined query (cyclic retry) →
+answer with citations + reasoning trace
+```
 
-ResearchFlow AI addresses these issues by implementing a **self-correcting agent architecture**.
-
-The system:
-
-- breaks complex questions into research tasks  
-- retrieves evidence from the web  
-- verifies evidence quality  
-- synthesizes answers grounded in sources  
-
-This demonstrates how **agent orchestration frameworks like LangGraph can improve reliability in AI systems.**
+This is **agentic reasoning** — the system evaluates its own evidence quality and decides whether to retry before synthesizing. Single-prompt LLM systems hallucinate. ResearchFlow verifies.
 
 ---
 
-# Key Features
+## 🏗️ Architecture
 
-## Agentic Research Workflow
-
-The system follows a structured **multi-step AI pipeline**:
-
-```
-Question
-   ↓
-Planner Node
-   ↓
-Sub-Question Generator
-   ↓
-Search Node (Tavily)
-   ↓
-Verifier Node
-   ↓
-Synthesizer Node
+```mermaid
+graph TD
+    A[User Query] --> B[Planner Node]
+    B --> C[Decomposer Node]
+    C --> D[Search Node - Tavily]
+    D --> E[Verifier Node]
+    E -->|confidence < threshold| D
+    E -->|confidence ≥ threshold| F[Synthesizer Node]
+    F --> G[Citation-Grounded Answer]
 ```
 
-Each node performs a **specialized reasoning task**, coordinated through **LangGraph orchestration**.
+### Node Responsibilities
+
+| Node | Role |
+|------|------|
+| **Planner** | Analyzes query intent, defines research strategy |
+| **Decomposer** | Breaks complex question into focused sub-queries |
+| **Search** | Retrieves web evidence via Tavily Search API |
+| **Verifier** | Scores evidence relevance and confidence (0–1) |
+| **Synthesizer** | Generates final answer with inline citations |
+
+The **cyclic edge** between Verifier and Search is the core innovation — if confidence falls below threshold, the system refines the query and searches again rather than hallucinating from weak evidence.
 
 ---
 
-## Self-Correcting Architecture
+## 🔬 Example
 
-The system includes mechanisms for improving answer reliability:
+**Query:** *"How does LangGraph enable self-correcting AI agents?"*
 
-- evidence verification  
-- confidence scoring  
-- reflection notes  
-- retry capability when evidence quality is low  
-
-This introduces **reflection-aware reasoning**, a key concept in agentic AI systems.
-
----
-
-## Source-Grounded Answers
-
-Answers are generated **only from retrieved evidence** and include citations.
-
-Example:
-
+**Pipeline trace:**
 ```
-Direct answer:
+[Planner]     → Strategy: technical documentation + recent examples
+[Decomposer]  → Sub-queries: ["LangGraph cyclic workflow", 
+                               "LangGraph conditional routing",
+                               "LangGraph stateful agents retry"]
+[Search]      → Retrieved 9 sources via Tavily
+[Verifier]    → Confidence: 0.44 (below threshold) → RETRY
+[Search]      → Refined query: "LangGraph self-correction checkpointing 2024"
+[Verifier]    → Confidence: 0.83 → PASS
+[Synthesizer] → Answer with 5 inline citations
+```
 
-• LangGraph enables self-correcting AI agents through cyclical workflows where an agent generates output, evaluates results, and loops back for revision.
+**Sample output:**
+```
+• LangGraph enables self-correcting agents through cyclical workflows where
+  an agent generates output, evaluates results, and loops back for revision.
 
-• It maintains shared state and checkpoints so intermediate results persist across iterations.
+• It maintains shared state and checkpoints so intermediate results persist
+  across iterations.
 
-• Conditional routing allows workflows to retry, revise, or terminate execution based on intermediate outcomes.
+• Conditional routing allows workflows to retry, revise, or terminate
+  execution based on intermediate outcomes.
 
-Limitation: LangGraph provides orchestration infrastructure, but evaluation logic must still be implemented by the developer.
+Limitation: LangGraph provides orchestration infrastructure, but evaluation
+logic must still be implemented by the developer.
 ```
 
 ---
 
-## Transparent Research Trace
+## 🚀 Quick Start
 
-Every research run produces a visible reasoning trace:
+### Prerequisites
+- Python 3.10+
+- [Ollama](https://ollama.com) running locally with Llama 3.2: `ollama pull llama3.2`
+- Tavily API key (free tier at [tavily.com](https://tavily.com))
 
-1. Question  
-2. Plan  
-3. Sub-questions  
-4. Evidence verification  
-5. Reflection / retry  
-6. Final synthesis  
+### Installation
 
-This provides **observability into the agent’s reasoning pipeline**.
-
----
-
-# System Architecture
-
-```
-User Question
-     │
-     ▼
-Planner Node
-Generates research plan
-     │
-     ▼
-Question Decomposition
-Creates sub-questions
-     │
-     ▼
-Search Node
-Retrieves evidence using Tavily
-     │
-     ▼
-Verifier Node
-Evaluates evidence relevance
-     │
-     ▼
-Synthesizer Node
-Generates citation-grounded answer
-```
-
-This architecture demonstrates **agentic AI system design** where multiple reasoning modules collaborate to produce reliable outputs.
-
----
-
-# Technology Stack
-
-## AI & Agent Frameworks
-
-- **LangGraph** — workflow orchestration for AI agents  
-- **Ollama** — local LLM inference  
-- **Tavily Search API** — web evidence retrieval  
-
-## Backend
-
-- **FastAPI**
-- Python
-- Async processing
-
-## Frontend
-
-- **React**
-- Axios
-- Responsive UI
-
----
-
-# Why LangGraph?
-
-LangGraph was selected because it provides primitives for building **stateful AI agents**.
-
-Key capabilities used in this project:
-
-- **Stateful workflows** — shared research state across nodes  
-- **Conditional routing** — retry or revise steps based on evidence quality  
-- **Modular reasoning nodes** — planner, search, verification, synthesis  
-- **Agent orchestration** — structured reasoning pipelines rather than single prompts  
-
-This enables building **reliable multi-step AI systems instead of simple LLM wrappers.**
-
----
-
-# Engineering Challenges
-
-Building a reliable AI research agent required solving several challenges.
-
-### Evidence Quality
-
-Web search often returns noisy or partially relevant information.  
-A verifier node evaluates retrieved evidence and assigns a confidence score.
-
-### Hallucination Prevention
-
-The synthesizer is restricted to generate answers **only from retrieved evidence**, reducing hallucinated responses.
-
-### Agent Coordination
-
-LangGraph manages orchestration between planner, search, verification, and synthesis nodes using shared workflow state.
-
-### Adaptive Research
-
-If evidence quality is low, the system can retry research with refined sub-questions.
-
----
-
-# Example Query
-
-```
-How does LangGraph enable self-correcting AI agents?
-```
-
-The system will:
-
-1. Generate a research plan  
-2. Decompose the question  
-3. Retrieve technical documentation  
-4. Verify evidence relevance  
-5. Generate a cited final answer  
-
----
-
-# Running the Project
-
-## 1. Clone the Repository
-
-```
-git clone https://github.com/your-username/researchflow-ai.git
-cd researchflow-ai
-```
-
----
-
-## 2. Backend Setup
-
-Create a Python environment:
-
-```
+```bash
+git clone https://github.com/krishnakoushik225/langgraph-research-agent
+cd langgraph-research-agent
 python -m venv .venv
-source .venv/bin/activate
-```
-
-Install dependencies:
-
-```
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Run the backend:
+### Environment Setup
 
+```bash
+cp .env.example .env
+# Add your keys:
+# TAVILY_API_KEY=your_key_here
+# LANGSMITH_API_KEY=your_key_here   (optional, for tracing)
 ```
+
+### Run
+
+```bash
+# Backend
 uvicorn app.main:app --reload
-```
+# Runs at http://127.0.0.1:8000
 
-Backend will run at:
-
-```
-http://127.0.0.1:8000
-```
-
----
-
-## 3. Frontend Setup
-
-Navigate to the frontend directory:
-
-```
-cd frontend
-```
-
-Install dependencies:
-
-```
-npm install
-```
-
-Run the frontend:
-
-```
-npm start
-```
-
-Open the application:
-
-```
-http://localhost:3000
+# Frontend (separate terminal)
+cd frontend && npm install && npm start
+# Runs at http://localhost:3000
 ```
 
 ---
 
-# Project Structure
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Agent Orchestration | LangGraph (cyclic state machine) |
+| LLM Backend | Ollama + Llama 3.2 (local, private) |
+| Web Search | Tavily Search API |
+| API Backend | FastAPI (async) |
+| Frontend | React + Axios |
+| Observability | LangSmith (optional tracing) |
+
+---
+
+## 📁 Project Structure
 
 ```
-researchflow-ai
-│
-├── backend
-│   ├── app
-│   │   ├── graph
-│   │   │   ├── planner.py
-│   │   │   ├── decomposer.py
-│   │   │   ├── search.py
-│   │   │   ├── verifier.py
-│   │   │   └── synthesizer.py
-│   │   │
-│   │   ├── services
-│   │   │   └── ollama_client.py
-│   │   │
-│   │   └── main.py
-│
-├── frontend
-│   ├── src
-│   │   ├── App.jsx
-│   │   └── App.css
-│
-├── docs
+langgraph-research-agent/
+├── backend/
+│   └── app/
+│       ├── graph/
+│       │   ├── planner.py        # Research strategy generation
+│       │   ├── decomposer.py     # Sub-question generation
+│       │   ├── search.py         # Tavily evidence retrieval
+│       │   ├── verifier.py       # Confidence scoring + retry logic
+│       │   └── synthesizer.py    # Citation-grounded answer generation
+│       ├── services/
+│       │   └── ollama_client.py  # Local LLM client
+│       └── main.py               # FastAPI entrypoint
+├── frontend/
+│   └── src/
+│       ├── App.jsx
+│       └── App.css
+├── docs/
 │   ├── researchflow-demo.png
 │   └── architecture.png
-│
+├── .env.example
+├── requirements.txt
 └── README.md
 ```
 
 ---
 
-# Engineering Concepts Demonstrated
+## ⚙️ Engineering Challenges Solved
 
-This project demonstrates practical experience with:
+**Evidence Quality** — Web search returns noisy results. The Verifier node assigns a confidence score and triggers re-search with refined queries when quality is low.
 
-- agentic AI workflows  
-- LangGraph orchestration  
-- retrieval-augmented reasoning  
-- evidence verification pipelines  
-- reflection-aware research agents  
-- LLM reliability strategies  
-- full-stack AI system development  
+**Hallucination Prevention** — The Synthesizer is constrained to generate answers only from retrieved evidence, with every claim linked to a source.
+
+**Agent Coordination** — LangGraph manages shared workflow state across all nodes, enabling conditional branching and retry without losing intermediate results.
+
+**Adaptive Research** — If initial sub-questions yield weak evidence, the system reformulates them before attempting synthesis.
 
 ---
 
-# Future Improvements
+## 💡 Why LangGraph?
 
-Possible enhancements:
+LangGraph was chosen specifically because it supports **cyclic graphs** — standard LangChain chains are DAGs (directed acyclic graphs) and cannot model retry loops. LangGraph enables:
 
-- vector database retrieval  
-- semantic search ranking  
-- LangSmith observability integration  
-- multi-agent collaboration  
-- workflow visualization  
+- **Stateful workflows** — shared research state persists across all nodes
+- **Conditional routing** — retry, revise, or terminate based on verifier output
+- **Modular reasoning nodes** — each node has a single, testable responsibility
+- **Checkpointing** — intermediate results survive failures and restarts
 
 ---
 
-# Author
+## 🔭 Roadmap
 
-Krishna Koushik Unnam  
-Software Engineer | AI Systems Developer
+- [ ] LangSmith full trace dashboard
+- [ ] Human-in-the-loop checkpoint before synthesis
+- [ ] Vector database retrieval (Pinecone) as additional search source
+- [ ] Streaming tokens to frontend in real-time
+- [ ] Multi-model support (GPT-4, Claude, Gemini)
+- [ ] Multi-agent collaboration mode
+
+---
+
+## 📄 License
+
+MIT — free to use and build on.
+
+---
+
+*Built by [Krishna Koushik Unnam](https://github.com/krishnakoushik225) · AI Systems Developer*
